@@ -1,4 +1,4 @@
-# shadow-electron-starter
+# Newmacs
 ClojureScript + Shadow-cljs + Electron + Reagent
 
 ## How to Run
