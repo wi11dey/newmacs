@@ -1,20 +1,35 @@
 (ns app.renderer.core
-  (:require [reagent.core :refer [atom]]
-            [reagent.dom :as rd]))
+  (:require [reagent.core :as r :refer [atom]]
+            [reagent.dom :as rd]
+            ["@uiw/react-codemirror" :default CodeMirror]
+            ["@replit/codemirror-minimap" :refer [showMinimap]]))
 
 (enable-console-print!)
 
-(defonce state (atom 0))
+(defonce code (atom "console.log('hello from cljs');"))
+
+(defn create-minimap [_view]
+  (let [dom (js/document.createElement "div")]
+    #js {:dom dom}))
+
+(def minimap-extension
+  (.compute showMinimap #js ["doc"]
+            (fn [_state]
+              #js {:create      create-minimap
+                   :displayText "blocks"
+                   :showOverlay "always"})))
+
+(defn editor []
+  [:> CodeMirror
+   {:height     "300px"
+    :value      @code
+    :extensions #js [minimap-extension]
+    :onChange   (fn [value _ev]
+                  (reset! code value))}])
 
 (defn root-component []
   [:div
-   [:div.logos
-    [:img.electron {:src "img/electron-logo.png"}]
-    [:img.cljs {:src "img/cljs-logo.svg"}]
-    [:img.reagent {:src "img/reagent-logo.png"}]]
-   [:button
-    {:on-click #(swap! state inc)}
-    (str "Clicked " @state " times")]])
+   [editor]])
 
 (defn ^:dev/after-load start! []
   (rd/render
