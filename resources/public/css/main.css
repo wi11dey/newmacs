@@ -1,3 +1,24 @@
+html, body {
+  margin: 0;
+  height: 100%;
+}
+
+/* Full-height chain down to the editor */
+#app-container,
+#app-container > div,
+.cm-theme {
+  height: 100%;
+}
+
+/* CodeMirror fills its container and has no border/focus outline */
+.cm-editor {
+  height: 100%;
+}
+
+.cm-editor.cm-focused {
+  outline: none;
+}
+
 .logos img {
   width: 100px;
   margin-left: 5px;

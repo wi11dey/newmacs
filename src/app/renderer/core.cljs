@@ -21,15 +21,14 @@
 
 (defn editor []
   [:> CodeMirror
-   {:height     "300px"
+   {:height     "100%"
     :value      @code
     :extensions #js [minimap-extension]
     :onChange   (fn [value _ev]
                   (reset! code value))}])
 
 (defn root-component []
-  [:div
-   [editor]])
+  [editor])
 
 (defn ^:dev/after-load start! []
   (rd/render
