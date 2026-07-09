@@ -1,7 +1,7 @@
 {
     "name": "newmacs",
     "version": "1.0.0",
-    "description": "shadow-cljs electron starter",
+    "description": "Beautiful, modern Emacs frontend.",
     "main": "resources/main.js",
     "scripts": {
         "dev": "shadow-cljs watch main renderer",
