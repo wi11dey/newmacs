@@ -2,7 +2,11 @@
   (:require [reagent.core :as r :refer [atom]]
             [reagent.dom :as rd]
             ["@uiw/react-codemirror" :default CodeMirror]
-            ["@replit/codemirror-minimap" :refer [showMinimap]]))
+            ["@replit/codemirror-minimap" :refer [showMinimap]]
+            [app.renderer.emacs :refer [with-emacs]]))
+
+(with-emacs
+  (message "Startup"))
 
 (enable-console-print!)
 
