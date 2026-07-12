@@ -5,10 +5,11 @@
             ["@replit/codemirror-minimap" :refer [showMinimap]]
             [app.renderer.emacs :refer [with-emacs]]))
 
-(with-emacs
-  (message "Startup"))
-
 (enable-console-print!)
+
+(with-emacs
+  (defvar newmacs-objects (make-hash-table :weakness 'value)
+    "Hashtable indexed by sxhash-eq. Acts as an obarray of passed to ClojureScript so they can be retreived."))
 
 (defonce code (atom "console.log('hello from cljs');"))
 
