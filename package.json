@@ -4,7 +4,7 @@
     "description": "Beautiful, modern Emacs frontend.",
     "main": "resources/main.js",
     "scripts": {
-        "dev": "shadow-cljs watch main renderer",
+        "dev": "shadow-cljs watch main renderer test",
         "build": "shadow-cljs compile main renderer",
         "clean": "rm -rf resources/public/js/* && rm -rf target"
     },
