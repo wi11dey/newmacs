@@ -1,6 +1,6 @@
 (ns app.renderer.core
   (:require [reagent.core :as r :refer [atom]]
-            [reagent.dom :as rd]
+            [reagent.dom.client :as rdc]
             ["@uiw/react-codemirror" :default CodeMirror]
             ["@replit/codemirror-minimap" :refer [showMinimap]]
             [app.renderer.emacs :refer [with-emacs]]))
@@ -36,6 +36,55 @@
 
 (defonce code (atom "console.log('hello from cljs');"))
 
+(def user-chrome-location
+  (.join (js/require "path")
+         (.homedir (js/require "os"))
+         ".newmacs"))
+
+(defn user-chrome []
+  (let [css (atom "")]
+    ;; TODO do this without a class
+    (r/create-class
+     {:display-name "user-chrome"
+
+      :component-did-mount
+      (fn [this]
+        (let [fs (js/require "fs")
+              path (js/require "path")
+              timer (atom nil)
+              reload (fn []
+                       (.readFile fs user-chrome-location "utf8"
+                                  (fn [error contents]
+                                    (cond
+                                      (nil? error) (reset! css contents)
+                                      (= "ENOENT" (.-code error)) (reset! css "")
+                                      :else (js/console.error
+                                             "Could not load ~/.newmacs"
+                                             error)))))
+              schedule-reload (fn []
+                                (when-let [pending @timer]
+                                  (js/clearTimeout pending))
+                                (reset! timer (js/setTimeout reload 50)))
+              watcher (.watch fs (.dirname path user-chrome-location)
+                              (fn [_event changed-file]
+                                (when (or (nil? changed-file)
+                                          (= (.basename path user-chrome-location)
+                                             (str changed-file)))
+                                  (schedule-reload))))]
+          (reload)
+          (aset this "userChromeWatcher" watcher)
+          (aset this "userChromeTimer" timer)))
+
+      :component-will-unmount
+      (fn [this]
+        (some-> (aget this "userChromeWatcher") .close)
+        (when-let [pending (some-> (aget this "userChromeTimer") deref)]
+          (js/clearTimeout pending)))
+
+      :reagent-render
+      (fn []
+        [:style#user-chrome @css])})))
+
 (def minimap-extension
   (.compute showMinimap #js ["doc"]
             (fn [_state]
@@ -53,10 +102,12 @@
     :onChange   (fn [value _ev]
                   (reset! code value))}])
 
-(defn root-component []
-  [editor])
+(defn root []
+  [:<>
+   [user-chrome]
+   [editor]])
 
-(defn ^:dev/after-load start! []
-  (rd/render
-   [root-component]
-   (js/document.getElementById "app-container")))
+(defn start! []
+  (rdc/render (rdc/create-root
+               (js/document.getElementById "app-container"))
+              [root]))
