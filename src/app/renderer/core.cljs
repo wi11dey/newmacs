@@ -1,5 +1,8 @@
 (ns app.renderer.core
-  (:require [reagent.core :as r :refer [atom]]
+  (:require [cljs.reader :as reader]
+            [clojure.string :as str]
+            [garden.core :as garden]
+            [reagent.core :as r]
             [reagent.dom.client :as rdc]
             ["@uiw/react-codemirror" :default CodeMirror]
             ["@replit/codemirror-minimap" :refer [showMinimap]]
@@ -34,7 +37,7 @@
            (defvar newmacs-objects (make-hash-table :weakness 'value)
              "Hashtable indexed by sxhash-eq. Acts as an obarray of passed to ClojureScript so they can be retreived.")))))
 
-(defonce code (atom "console.log('hello from cljs');"))
+(defonce code (r/atom "console.log('hello from cljs');"))
 
 (def user-chrome-location
   (.join (js/require "path")
@@ -42,48 +45,16 @@
          ".newmacs"))
 
 (defn user-chrome []
-  (let [css (atom "")]
-    ;; TODO do this without a class
-    (r/create-class
-     {:display-name "user-chrome"
-
-      :component-did-mount
-      (fn [this]
-        (let [fs (js/require "fs")
-              path (js/require "path")
-              timer (atom nil)
-              reload (fn []
-                       (.readFile fs user-chrome-location "utf8"
-                                  (fn [error contents]
-                                    (cond
-                                      (nil? error) (reset! css contents)
-                                      (= "ENOENT" (.-code error)) (reset! css "")
-                                      :else (js/console.error
-                                             "Could not load ~/.newmacs"
-                                             error)))))
-              schedule-reload (fn []
-                                (when-let [pending @timer]
-                                  (js/clearTimeout pending))
-                                (reset! timer (js/setTimeout reload 50)))
-              watcher (.watch fs (.dirname path user-chrome-location)
-                              (fn [_event changed-file]
-                                (when (or (nil? changed-file)
-                                          (= (.basename path user-chrome-location)
-                                             (str changed-file)))
-                                  (schedule-reload))))]
-          (reload)
-          (aset this "userChromeWatcher" watcher)
-          (aset this "userChromeTimer" timer)))
-
-      :component-will-unmount
-      (fn [this]
-        (some-> (aget this "userChromeWatcher") .close)
-        (when-let [pending (some-> (aget this "userChromeTimer") deref)]
-          (js/clearTimeout pending)))
-
-      :reagent-render
-      (fn []
-        [:style#user-chrome @css])})))
+  (let [css (if (str/blank? source)
+              ""
+              (try
+                (apply garden/css (reader/read-string (.readFileSync (js/require "fs") user-chrome-location "utf8")))
+                (catch :default error
+                  (if (not= "ENOENT" (.-code error))
+                    (js/console.error "Could not load ~/.newmacs" error))
+                  "")))]
+    (fn []
+      [:style#user-chrome css])))
 
 (def minimap-extension
   (.compute showMinimap #js ["doc"]
