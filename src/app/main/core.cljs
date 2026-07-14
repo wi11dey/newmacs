@@ -1,5 +1,5 @@
 (ns app.main.core
-  (:require ["electron" :refer [app BrowserWindow crashReporter]]))
+  (:require ["electron" :refer [app BrowserWindow]]))
 
 (defn main []
   (.on app "window-all-closed" #(.quit app))
