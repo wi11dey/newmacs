@@ -1,5 +1,6 @@
 (ns app.renderer.emacs
-  (:require [clojure.string :as str])
+  (:require [clojure.string :as str]
+            #?(:cljs ["@tauri-apps/api/core" :refer [invoke]]))
   #?(:cljs (:require-macros [app.renderer.emacs])))
 
 (defn ->elisp [form]
@@ -15,4 +16,4 @@
 
 #?(:cljs
    (defn emacs-eval-str [elisp]
-     (.execFileSync (js/require "child_process") "emacsclient" #js ["-e" elisp])))
+     (invoke "emacs_eval" #js {:elisp elisp})))

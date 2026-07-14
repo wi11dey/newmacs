@@ -1,0 +1,30 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Newmacs",
+  "version": "1.0.0",
+  "identifier": "com.willdey.newmacs",
+  "build": {
+    "beforeDevCommand": "npm run dev:renderer",
+    "beforeBuildCommand": "npm run build:renderer",
+    "devUrl": "http://localhost:8080",
+    "frontendDist": "../resources/public"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Newmacs",
+        "width": 800,
+        "height": 600,
+        "dragDropEnabled": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": []
+  }
+}

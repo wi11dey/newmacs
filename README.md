@@ -1,16 +1,23 @@
 # Newmacs
-ClojureScript + Shadow-cljs + Electron + Reagent
+ClojureScript + Shadow-cljs + Tauri + Reagent
 
 ## How to Run
+
+Install Node.js, Rust, and the [Tauri prerequisites](https://v2.tauri.app/start/prerequisites/)
+for your platform, then:
+
 ```
 npm install
-
 npm run dev
-npx electron .
 ```
 
 ## Release
 ```
 npm run build
-npx electron-packager . HelloWorld --platform=darwin --arch=x64
 ```
+
+On macOS this produces `src-tauri/target/release/bundle/macos/Newmacs.app`.
+
+The renderer is still implemented in ClojureScript. Tauri's Rust backend owns
+the native filesystem, process, and callback-listener operations that cannot
+run in a sandboxed webview.
