@@ -52,9 +52,9 @@
 (def minimap-extension
   (.compute showMinimap #js ["doc"]
             (fn [_state]
-              #js {:create      (fn [_view]
-                                  (let [dom (js/document.createElement "div")]
-                                    #js {:dom dom}))
+              #js {:create (fn [_view]
+                             (let [dom (js/document.createElement "div")]
+                               #js {:dom dom}))
                    :displayText "blocks"
                    :showOverlay "always"})))
 
@@ -68,20 +68,23 @@
     :onChange   (fn [value _ev]
                   (reset! code value))}])
 
-(defn dockview-ready [event]
-  (.addPanel ^js (.-api event)
-             #js {:id "editor"
-                  :component "editor"
-                  :title "Editor"}))
-
 (defn root []
   [:<>
    [user-chrome]
    [:> DockviewReact
-    {:components #js {"editor" #(r/as-element [editor])}
-     :onReady dockview-ready}]])
+    {:components #js {"editor" #(r/as-element [editor])
+                      "editor2" #(r/as-element [editor])}
+     :onReady (fn [event]
+                (.addPanel ^js (.-api event)
+                           #js {:id "editor"
+                                :component "editor"
+                                :title "Editor"})
+                (.addPanel ^js (.-api event)
+                           #js {:id "editor2"
+                                :component "editor2"
+                                :title "Editor2"}))}]])
 
 (defn start! []
-  (-> (js/document.getElementById "app-container")
+  (-> (js/document.getElementById "app")
       (rdc/create-root)
       (rdc/render [root])))
