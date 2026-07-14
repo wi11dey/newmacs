@@ -29,3 +29,8 @@ html, body {
 .code-editor .cm-editor.cm-focused {
     outline: none;
 }
+
+.code-editor .cm-editor .cm-scroller {
+    font-family: inherit;
+    font-size: inherit;
+}
