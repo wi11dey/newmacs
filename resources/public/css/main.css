@@ -1,25 +1,31 @@
+html, body, #app-container {
+    width: 100%;
+    height: 100%;
+}
+
 html, body {
-  margin: 0;
-  height: 100%;
+    margin: 0;
+    overflow: hidden;
 }
 
-/* Full-height chain down to the editor */
-#app-container,
-#app-container > div,
-.cm-theme {
-  height: 100%;
+#app-container {
+  overflow: hidden;
 }
 
-/* CodeMirror fills its container and has no border/focus outline */
-.cm-editor {
-  height: 100%;
+.code-editor {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
 }
 
-.cm-editor.cm-focused {
-  outline: none;
+.code-editor .cm-editor {
+    overflow: hidden;
 }
 
-.logos img {
-  width: 100px;
-  margin-left: 5px;
+.code-editor .cm-scroller {
+    overflow: auto;
+}
+
+.code-editor .cm-editor.cm-focused {
+    outline: none;
 }

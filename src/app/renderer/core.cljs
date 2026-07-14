@@ -6,6 +6,7 @@
             [reagent.dom.client :as rdc]
             ["@uiw/react-codemirror" :default CodeMirror]
             ["@replit/codemirror-minimap" :refer [showMinimap]]
+            ["dockview-react" :refer [DockviewReact themeDark]]
             [app.renderer.emacs :refer [with-emacs]]))
 
 (enable-console-print!)
@@ -59,16 +60,26 @@
 
 (defn editor []
   [:> CodeMirror
-   {:height     "100%"
+   {:className  "code-editor"
+    :height     "100%"
+    :width      "100%"
     :value      @code
     :extensions #js [minimap-extension]
     :onChange   (fn [value _ev]
                   (reset! code value))}])
 
+(defn dockview-ready [event]
+  (.addPanel ^js (.-api event)
+             #js {:id "editor"
+                  :component "editor"
+                  :title "Editor"}))
+
 (defn root []
   [:<>
    [user-chrome]
-   [editor]])
+   [:> DockviewReact
+    {:components #js {"editor" #(r/as-element [editor])}
+     :onReady dockview-ready}]])
 
 (defn start! []
   (-> (js/document.getElementById "app-container")
