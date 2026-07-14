@@ -2,17 +2,18 @@
     "name": "newmacs",
     "version": "1.0.0",
     "description": "Beautiful, modern Emacs frontend.",
-    "main": "resources/main.js",
     "scripts": {
         "copy:css": "mkdir -p resources/public/css/vendor && cp node_modules/dockview-react/dist/styles/dockview.css resources/public/css/vendor/dockview.css",
-        "dev": "npm run copy:css && shadow-cljs watch main renderer",
-        "build": "npm run copy:css && shadow-cljs compile main renderer",
-        "clean": "rm -rf resources/public/js/* resources/public/css/vendor target"
+        "dev": "tauri dev",
+        "dev:renderer": "npm run copy:css && shadow-cljs watch renderer",
+        "build": "tauri build --bundles app",
+        "build:renderer": "npm run copy:css && shadow-cljs release renderer",
+        "clean": "rm -rf resources/public/js/* resources/public/css/vendor target src-tauri/target"
     },
     "keywords": [
         "shadow-cljs",
         "reagent",
-        "electron"
+        "tauri"
     ],
     "author": "Will Dey <will_dey@alumni.harvard.edu>",
     "license": "MIT",
@@ -20,13 +21,12 @@
         "@replit/codemirror-minimap": "^0.5.2",
         "@uiw/react-codemirror": "^4.25.11",
         "dockview-react": "^7.0.2",
-        "express": "^5.2.1",
+        "@tauri-apps/api": "^2.8.0",
         "react": "^18.1.0",
         "react-dom": "^18.1.0"
     },
     "devDependencies": {
-        "electron": "^19.0.4",
-        "electron-packager": "^15.5.1",
+        "@tauri-apps/cli": "^2.8.4",
         "shadow-cljs": "^3.4.11"
     }
 }

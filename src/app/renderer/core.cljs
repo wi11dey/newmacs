@@ -7,47 +7,41 @@
             ["@uiw/react-codemirror" :default CodeMirror]
             ["@replit/codemirror-minimap" :refer [showMinimap]]
             ["dockview-react" :refer [DockviewReact themeDark]]
+            ["@tauri-apps/api/core" :refer [invoke]]
             [app.renderer.emacs :refer [with-emacs]]))
 
 (enable-console-print!)
 
-(let [token (-> (js/require "crypto")
-                (.randomBytes 128)
-                (.toString "base64url"))
-      express (js/require "express")
-      server (-> ^js (express)
-                 (.use (.text express #js {:type "application/edn"}))
-                 (.listen 0))]
-  (.on server "listening"
-       (fn []
-         (let [port (.. server address -port)]
-           (js/console.log (str "Listening for Emacs callbacks on" port))
-           (with-emacs
-             (defconst newmacs-port ~port)
-             (defconst newmacs-token ~token)
+(-> (invoke "start_emacs_bridge")
+    (.then (fn [bridge]
+             (let [port  (.-port bridge)
+                   token (.-token bridge)]
+               (js/console.log (str "Listening for Emacs callbacks on " port))
+               (with-emacs
+                 (defconst newmacs-port ~port)
+                 (defconst newmacs-token ~token)
 
-             (message "Newmacs connected on port %d" newmacs-port)
+                 (message "Newmacs connected on port %d" newmacs-port)
 
-             (defun newmacs-new-buffer ())
+                 (defun newmacs-new-buffer ())
 
-             (add-hook 'after-change-major-mode-hook 'newmacs-new-buffer))))))
+                 (add-hook 'after-change-major-mode-hook 'newmacs-new-buffer)))))
+    (.catch #(js/console.error "Could not connect to Emacs" %)))
 
 (defonce code (r/atom "console.log('hello from cljs');"))
 
-(def user-chrome-location
-  (.join (js/require "path")
-         (.homedir (js/require "os"))
-         ".newmacs"))
-
 (defn user-chrome []
-  (let [css (try
-              (apply garden/css (reader/read-string (.readFileSync (js/require "fs") user-chrome-location "utf8")))
-              (catch :default error
-                (if (not= "ENOENT" (.-code error))
-                  (js/console.error "Could not load ~/.newmacs" error))
-                ""))]
+  (let [css (r/atom "")]
+    (-> (invoke "read_user_chrome")
+        (.then (fn [source]
+                 (when (seq source)
+                   (try
+                     (reset! css (apply garden/css (reader/read-string source)))
+                     (catch :default error
+                       (js/console.error "Could not parse ~/.newmacs" error))))))
+        (.catch #(js/console.error "Could not load ~/.newmacs" %)))
     (fn []
-      [:style#user-chrome css])))
+      [:style#user-chrome @css])))
 
 (def minimap-extension
   (.compute showMinimap #js ["doc"]
