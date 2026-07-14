@@ -10,32 +10,26 @@
 
 (enable-console-print!)
 
-(let [express (js/require "express")
+(let [token (-> (js/require "crypto")
+                (.randomBytes 128)
+                (.toString "base64url"))
+      express (js/require "express")
       server (-> ^js (express)
-                 (.use (.json express))
-                 (.post "/code"
-                        (fn [req res]
-                          (let [next-code (some-> req .-body (aget "code"))]
-                            (if (string? next-code)
-                              (do
-                                (.json res (clj->js {:ok true
-                                                     :code next-code})))
-                              (-> res
-                                  (.status 400)
-                                  (.json (clj->js {:ok false
-                                                   :error "Expected JSON body with string field `code`."})))))))
+                 (.use (.text express #js {:type "application/edn"}))
                  (.listen 0))]
   (.on server "listening"
        (fn []
-         (js/console.log (str "Listening for Emacs callbacks on" (.. server address -port)))
+         (let [port (.. server address -port)]
+           (js/console.log (str "Listening for Emacs callbacks on" port))
+           (with-emacs
+             (defconst newmacs-port ~port)
+             (defconst newmacs-token ~token)
 
-         (with-emacs
-           (defconst newmacs-port 0)
+             (message "Newmacs connected on port %d" newmacs-port)
 
-           (message "Newmacs connected")
+             (defun newmacs-new-buffer ())
 
-           (defvar newmacs-objects (make-hash-table :weakness 'value)
-             "Hashtable indexed by sxhash-eq. Acts as an obarray of passed to ClojureScript so they can be retreived.")))))
+             (add-hook 'after-change-major-mode-hook 'newmacs-new-buffer))))))
 
 (defonce code (r/atom "console.log('hello from cljs');"))
 
@@ -45,14 +39,12 @@
          ".newmacs"))
 
 (defn user-chrome []
-  (let [css (if (str/blank? source)
-              ""
-              (try
-                (apply garden/css (reader/read-string (.readFileSync (js/require "fs") user-chrome-location "utf8")))
-                (catch :default error
-                  (if (not= "ENOENT" (.-code error))
-                    (js/console.error "Could not load ~/.newmacs" error))
-                  "")))]
+  (let [css (try
+              (apply garden/css (reader/read-string (.readFileSync (js/require "fs") user-chrome-location "utf8")))
+              (catch :default error
+                (if (not= "ENOENT" (.-code error))
+                  (js/console.error "Could not load ~/.newmacs" error))
+                ""))]
     (fn []
       [:style#user-chrome css])))
 
@@ -79,6 +71,6 @@
    [editor]])
 
 (defn start! []
-  (rdc/render (rdc/create-root
-               (js/document.getElementById "app-container"))
-              [root]))
+  (-> (js/document.getElementById "app-container")
+      (rdc/create-root)
+      (rdc/render [root])))

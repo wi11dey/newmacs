@@ -2,31 +2,17 @@
   (:require [clojure.string :as str])
   #?(:cljs (:require-macros [app.renderer.emacs])))
 
-(defn ->elisp
-  "Returns a Clojure form that, when evaluated, is a string of Elisp."
-  [form]
+(defn ->elisp [form]
   (cond
-    (and (seq? form) (= (first form) 'clojure.core/unquote)) `(->elisp ~(second form))
-    (string? form)                                           (pr-str form)
-    (char? form)                                             (str "?" form)
-    (true? form)                                             "t"
-    (false? form)                                            "nil"
-    (nil? form)                                              "nil"
-    (keyword? form)                                          (str form)
-    (symbol? form)                                           (str form)
-    ;; TODO: map these properly
-    (vector? form)                                           (str "[" (str/join " " (map ->elisp form)) "]")
-    (seq? form)                                              (str "(" (str/join " " (map ->elisp form)) ")")
-    :else                                                    (str form)))
+    (and (seq? form) (= (first form) 'clojure.core/unquote)) (list `(apply str (->elisp ~(second form))))
+    (string? form) (list (pr-str form))
+    (seq? form) (concat '("(") (interpose " " (mapcat ->elisp form)) '(")"))
+    :else (list (str form))))
 
 #?(:clj
    (defmacro with-emacs [& body]
-     (let [elisp (->elisp (cons 'progn body))]
-       `(emacs-eval ~elisp))))
+     `(emacs-eval-str (str ~@(->elisp (cons 'progn body))))))
 
 #?(:cljs
-   (def ^:private child-process (js/require "child_process")))
-
-#?(:cljs
-   (defn emacs-eval [elisp]
-     (.execFileSync child-process "emacsclient" #js ["-e" elisp])))
+   (defn emacs-eval-str [elisp]
+     (.execFileSync (js/require "child_process") "emacsclient" #js ["-e" elisp])))
