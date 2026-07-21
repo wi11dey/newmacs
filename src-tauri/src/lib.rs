@@ -3,7 +3,7 @@ use rand::RngCore;
 use serde::Serialize;
 use std::{
     fs,
-    io::{Read, Write},
+    io::{self, Read, Write},
     net::TcpListener,
     path::PathBuf,
     process::Command,
@@ -19,7 +19,10 @@ struct EmacsBridge {
 #[tauri::command]
 fn start_emacs_bridge() -> Result<EmacsBridge, String> {
     let listener = TcpListener::bind(("127.0.0.1", 0)).map_err(|error| error.to_string())?;
-    let port = listener.local_addr().map_err(|error| error.to_string())?.port();
+    let port = listener
+        .local_addr()
+        .map_err(|error| error.to_string())?
+        .port();
     let mut token_bytes = [0_u8; 128];
     rand::thread_rng().fill_bytes(&mut token_bytes);
     let token = URL_SAFE_NO_PAD.encode(token_bytes);
@@ -70,11 +73,33 @@ fn read_user_chrome() -> Result<String, String> {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .setup(|_app| {
+            let server = rouille::Server::new("127.0.0.1:0", |request| {
+                let body = request
+                    .data()
+                    .and_then(|mut data| {
+                        let mut text = String::new();
+                        data.read_to_string(&mut text).ok()?;
+                        Some(text)
+                    })
+                    .unwrap_or_default();
+
+                rouille::Response::text(body)
+            })
+            .map_err(|error| io::Error::other(error.to_string()))?;
+            let address = server.server_addr();
+            println!("Newmacs listening on address");
+
+            thread::Builder::new()
+                .name("newmacs-http-server".to_owned())
+                .spawn(move || server.run())?;
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             start_emacs_bridge,
             emacs_eval,
             read_user_chrome
         ])
         .run(tauri::generate_context!())
-        .expect("error while running Newmacs");
+        .expect("Error while starting Tauri");
 }
