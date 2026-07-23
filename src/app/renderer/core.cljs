@@ -44,7 +44,6 @@
             (prin1-to-string
              (named-let to-cljs ((elisp form))
                         (pcase elisp
-                               (`(a . (and b (pred (not listp)))) `(->Cons ,a ,b))
                                (_ elisp))))
             'utf-8))
           url-show-status)
