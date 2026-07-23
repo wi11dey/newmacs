@@ -8,25 +8,21 @@
             ["@replit/codemirror-minimap" :refer [showMinimap]]
             ["dockview-react" :refer [DockviewReact themeDark]]
             ["@tauri-apps/api/core" :refer [invoke]]
+            ["@tauri-apps/api/event" :refer [listen]]
             [app.renderer.emacs :refer [with-emacs]]))
 
 (enable-console-print!)
 
-(-> (invoke "start_emacs_bridge")
-    (.then (fn [bridge]
-             (let [port  (.-port bridge)
-                   token (.-token bridge)]
-               (js/console.log (str "Listening for Emacs callbacks on " port))
-               (with-emacs
-                 (defconst newmacs-port ~port)
-                 (defconst newmacs-token ~token)
+(listen "cljs"
+        (fn [event]
+          (js/console.log "Requested to run:" (.-payload event))))
 
-                 (message "Newmacs connected on port %d" newmacs-port)
+(with-emacs
+  (message "Newmacs connected on port %d" newmacs-port) ; `newmacs-port' is set on emacs by the server
 
-                 (defun newmacs-new-buffer ())
+  (defun newmacs-new-buffer ())
 
-                 (add-hook 'after-change-major-mode-hook 'newmacs-new-buffer)))))
-    (.catch #(js/console.error "Could not connect to Emacs" %)))
+  (add-hook 'after-change-major-mode-hook 'newmacs-new-buffer))
 
 (defonce code (r/atom "console.log('hello from cljs');"))
 
