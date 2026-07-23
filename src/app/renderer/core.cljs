@@ -18,7 +18,16 @@
           (js/console.log "Requested to run:" (.-payload event))))
 
 (with-emacs
+  (require 'url)
+
   (message "Newmacs connected on port %d" newmacs-port) ; `newmacs-port' is set on emacs by the server
+
+  (defun newmacs-send (form)
+    (let ((url-request-method "POST")
+          (url-request-extra-headers
+           '(("Content-Type" . "text/plain; charset=utf-8")))
+          (url-request-data (encode-coding-string (prin1-to-string form) 'utf-8)))
+      (url-retrieve-synchronously (concat "http://localhost:" newmacs-port))))
 
   (defun newmacs-new-buffer ())
 

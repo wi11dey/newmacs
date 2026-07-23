@@ -3,6 +3,7 @@
             #?(:cljs ["@tauri-apps/api/core" :refer [invoke]]))
   #?(:cljs (:require-macros [app.renderer.emacs])))
 
+;; Exists because normal backquote fully qualifies symbols
 (defn ->elisp [form]
   (cond
     (and (seq? form) (= (first form) 'clojure.core/unquote)) (list `(apply str (->elisp ~(second form))))
