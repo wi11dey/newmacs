@@ -26,8 +26,11 @@
     (let ((url-request-method "POST")
           (url-request-extra-headers
            '(("Content-Type" . "text/plain; charset=utf-8")))
-          (url-request-data (encode-coding-string (prin1-to-string form) 'utf-8)))
-      (url-retrieve-synchronously (concat "http://localhost:" newmacs-port))))
+          (url-request-data (encode-coding-string (prin1-to-string form) 'utf-8))
+          url-show-status)
+      (url-retrieve-synchronously (format "http://localhost:%d/" newmacs-port))))
+
+  (newmacs-send '(test))
 
   (defun newmacs-new-buffer ())
 
