@@ -1,5 +1,6 @@
 (ns app.renderer.core
-  (:require [cljs.reader :as reader]
+  (:require [cljs.js :as cljs]
+            [cljs.reader :as reader]
             [clojure.string :as str]
             [garden.core :as garden]
             [reagent.core :as r]
@@ -9,13 +10,25 @@
             ["flexlayout-react" :refer [Layout Model]]
             ["@tauri-apps/api/core" :refer [invoke]]
             ["@tauri-apps/api/event" :refer [listen]]
-            [app.renderer.emacs :refer [with-emacs]]))
+            [app.renderer.emacs :refer [with-emacs]])
+  (:require-macros [app.renderer.eval :refer [analyze-ns]]))
 
 (enable-console-print!)
 
-(listen "newmacs-eval"
-        (fn [event]
-          (js/console.log "Requested to run:" (.-payload event))))
+(let [compile-state (cljs/empty-state
+                     #(assoc-in %
+                                [:cljs.analyzer/namespaces 'app.renderer.core]
+                                (analyze-ns)))]
+  (listen "newmacs-eval"
+          (fn [event]
+            (cljs/eval-str compile-state
+                           (.-payload event)
+                           nil
+                           {:eval cljs/js-eval
+                            :ns 'app.renderer.core}
+                           (fn [{:keys [error]}]
+                             (when error
+                               (js/console.error "Could not evaluate form" error)))))))
 
 (with-emacs
   (require 'url)
@@ -30,7 +43,7 @@
           url-show-status)
       (url-retrieve-synchronously (format "http://localhost:%d/" newmacs-port))))
 
-  (newmacs-eval '(test))
+  (newmacs-eval '(js/console.error "Hello"))
 
   (defun newmacs-new-buffer ())
 
@@ -99,3 +112,4 @@
   (-> (js/document.getElementById "app")
       (rdc/create-root)
       (rdc/render [root])))
+
