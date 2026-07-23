@@ -6,7 +6,7 @@
             [reagent.dom.client :as rdc]
             ["@uiw/react-codemirror" :default CodeMirror]
             ["@replit/codemirror-minimap" :refer [showMinimap]]
-            ["dockview-react" :refer [DockviewReact themeDark]]
+            ["flexlayout-react" :refer [Layout Model]]
             ["@tauri-apps/api/core" :refer [invoke]]
             ["@tauri-apps/api/event" :refer [listen]]
             [app.renderer.emacs :refer [with-emacs]]))
@@ -70,21 +70,30 @@
     :onChange   (fn [value _ev]
                   (reset! code value))}])
 
+(def windows
+  (.fromJson Model
+             (clj->js
+              {:global {:tabEnableClose false}
+               :borders []
+               :layout {:type "row"
+                        :children [{:type "tabset"
+                                    :children [{:type "tab"
+                                                :id "editor"
+                                                :name "Editor"
+                                                :component "editor"}
+                                               {:type "tab"
+                                                :id "editor2"
+                                                :name "Editor2"
+                                                :component "editor"}]}]}})))
+
 (defn root []
   [:<>
    [user-chrome]
-   [:> DockviewReact
-    {:components #js {"editor" #(r/as-element [editor])
-                      "editor2" #(r/as-element [editor])}
-     :onReady (fn [event]
-                (.addPanel ^js (.-api event)
-                           #js {:id "editor"
-                                :component "editor"
-                                :title "Editor"})
-                (.addPanel ^js (.-api event)
-                           #js {:id "editor2"
-                                :component "editor2"
-                                :title "Editor2"}))}]])
+   [:> Layout {:model windows
+               :factory (fn [^js node]
+                          (case (.getComponent node)
+                            "editor" (r/as-element [editor])
+                            nil))}]])
 
 (defn start! []
   (-> (js/document.getElementById "app")
