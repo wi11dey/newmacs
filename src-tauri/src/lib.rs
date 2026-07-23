@@ -9,6 +9,7 @@ use std::{
     process::Command,
     thread,
 };
+use tauri::Emitter;
 
 #[derive(Serialize)]
 struct EmacsBridge {
@@ -73,26 +74,35 @@ fn read_user_chrome() -> Result<String, String> {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
-        .setup(|_app| {
-            let server = rouille::Server::new("127.0.0.1:0", |request| {
-                let body = request
-                    .data()
-                    .and_then(|mut data| {
-                        let mut text = String::new();
-                        data.read_to_string(&mut text).ok()?;
-                        Some(text)
-                    })
-                    .unwrap_or_default();
+        .setup(|app| {
+            let app_handle = app.handle().clone();
 
-                rouille::Response::text(body)
+            let server = rouille::Server::new("127.0.0.1:0", move |request| {
+                let Some(mut data) = request.data() else {
+                    return rouille::Response::text("Missing request body").with_status_code(400);
+                };
+
+                let mut cljs = String::new();
+                if data.read_to_string(&mut cljs).is_err() {
+                    return rouille::Response::text("Malformed string").with_status_code(400);
+                }
+
+                if let Err(error) = app_handle.emit("cljs", cljs) {
+                    eprintln!("Failed to run ClojureScript: {error}");
+                    return rouille::Response::text("Internal server error").with_status_code(500);
+                }
+
+                rouille::Response::empty_204()
             })
-            .map_err(|error| io::Error::other(error.to_string()))?;
-            let address = server.server_addr();
-            println!("Newmacs listening on address");
+            .map_err(io::Error::other)?;
+
+            let port = server.server_addr().port();
+            println!("Newmacs listening on port {port}");
 
             thread::Builder::new()
-                .name("newmacs-http-server".to_owned())
+                .name("http-server".to_owned())
                 .spawn(move || server.run())?;
+
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
