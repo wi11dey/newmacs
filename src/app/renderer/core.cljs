@@ -15,10 +15,10 @@
 
 (enable-console-print!)
 
+(defrecord Cons [car cdr])
+
 (let [compile-state (cljs/empty-state
-                     #(assoc-in %
-                                [:cljs.analyzer/namespaces 'app.renderer.core]
-                                (analyze-ns)))]
+                     #(assoc-in % [:cljs.analyzer/namespaces 'app.renderer.core] (analyze-ns)))]
   (listen "newmacs-eval"
           (fn [event]
             (cljs/eval-str compile-state
@@ -31,23 +31,36 @@
                                (js/console.error "Could not evaluate form" error)))))))
 
 (with-emacs
+  (require 'subr-x)
+  (require 'pcase)
   (require 'url)
-
-  (message "Newmacs connected on port %d" newmacs-port) ; `newmacs-port' is set on emacs by the server
 
   (defun newmacs-eval (form)
     (let ((url-request-method "POST")
           (url-request-extra-headers
            '(("Content-Type" . "text/plain; charset=utf-8")))
-          (url-request-data (encode-coding-string (prin1-to-string form) 'utf-8))
+          (url-request-data
+           (encode-coding-string
+            (prin1-to-string
+             (named-let to-cljs ((elisp form))
+                        (pcase elisp
+                               (`(a . (and b (pred (not listp)))) `(->Cons ,a ,b))
+                               (_ elisp))))
+            'utf-8))
           url-show-status)
       (url-retrieve-synchronously (format "http://localhost:%d/" newmacs-port))))
 
   (newmacs-eval '(js/console.error "Hello"))
 
   (defun newmacs-new-buffer ())
+  (add-hook 'after-change-major-mode-hook 'newmacs-new-buffer)
 
-  (add-hook 'after-change-major-mode-hook 'newmacs-new-buffer))
+  (defun newmacs-window-state-change (&rest args)
+    )
+  (add-hook 'window-state-change-functions 'newmacs-window-state-change)
+
+  (message "Newmacs connected on port %d" newmacs-port) ; `newmacs-port' is set on emacs by the server
+  )
 
 (defonce code (r/atom "console.log('hello from cljs');"))
 
