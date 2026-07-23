@@ -3,7 +3,6 @@ node_modules/
 .nrepl-port
 
 resources/public/js
-resources/public/css/vendor
 resources/main.js
 target/
 .idea/

@@ -51,10 +51,11 @@ fn emacs_eval(elisp: String) -> Result<String, String> {
     let output = Command::new("emacsclient")
         .args(["-e", &elisp])
         .output()
-        .map_err(|error| format!("could not run emacsclient: {error}"))?;
+        .map_err(|error| format!("Failed to run Elisp: {error}"))?;
 
     if output.status.success() {
-        String::from_utf8(output.stdout).map_err(|error| error.to_string())
+        String::from_utf8(output.stdout)
+            .map_err(|error| format!("Non-UTF-8 string returned from Emacs {error}"))
     } else {
         Err(String::from_utf8_lossy(&output.stderr).trim().to_owned())
     }
@@ -81,27 +82,23 @@ pub fn run() {
                 let Some(mut data) = request.data() else {
                     return rouille::Response::text("Missing request body").with_status_code(400);
                 };
-
                 let mut cljs = String::new();
                 if data.read_to_string(&mut cljs).is_err() {
                     return rouille::Response::text("Malformed string").with_status_code(400);
                 }
-
                 if let Err(error) = app_handle.emit("cljs", cljs) {
                     eprintln!("Failed to run ClojureScript: {error}");
                     return rouille::Response::text("Internal server error").with_status_code(500);
                 }
-
                 rouille::Response::empty_204()
             })
             .map_err(io::Error::other)?;
 
             let port = server.server_addr().port();
-            println!("Newmacs listening on port {port}");
-
             thread::Builder::new()
                 .name("http-server".to_owned())
                 .spawn(move || server.run())?;
+            println!("Newmacs listening on port {port}");
 
             Ok(())
         })

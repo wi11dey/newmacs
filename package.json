@@ -3,12 +3,12 @@
     "version": "1.0.0",
     "description": "Beautiful, modern Emacs frontend.",
     "scripts": {
-        "copy:css": "mkdir -p resources/public/css/vendor && cp node_modules/dockview-react/dist/styles/dockview.css resources/public/css/vendor/dockview.css",
         "dev": "tauri dev",
-        "dev:renderer": "npm run copy:css && shadow-cljs watch renderer",
+        "dev:renderer": "shadow-cljs watch renderer",
         "build": "tauri build --bundles app",
-        "build:renderer": "npm run copy:css && shadow-cljs release renderer",
-        "clean": "rm -rf resources/public/js/* resources/public/css/vendor target src-tauri/target"
+        "build:renderer": "shadow-cljs release renderer",
+        "clean": "rm -rf resources/public/js/* target src-tauri/target",
+	"format": "cargo fmt --manifest-path src-tauri/Cargo.toml"
     },
     "keywords": [
         "shadow-cljs",
