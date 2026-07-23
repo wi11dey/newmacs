@@ -13,7 +13,7 @@
 
 (enable-console-print!)
 
-(listen "cljs"
+(listen "newmacs-eval"
         (fn [event]
           (js/console.log "Requested to run:" (.-payload event))))
 
@@ -22,7 +22,7 @@
 
   (message "Newmacs connected on port %d" newmacs-port) ; `newmacs-port' is set on emacs by the server
 
-  (defun newmacs-send (form)
+  (defun newmacs-eval (form)
     (let ((url-request-method "POST")
           (url-request-extra-headers
            '(("Content-Type" . "text/plain; charset=utf-8")))
@@ -30,7 +30,7 @@
           url-show-status)
       (url-retrieve-synchronously (format "http://localhost:%d/" newmacs-port))))
 
-  (newmacs-send '(test))
+  (newmacs-eval '(test))
 
   (defun newmacs-new-buffer ())
 

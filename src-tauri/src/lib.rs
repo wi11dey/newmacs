@@ -46,7 +46,7 @@ pub fn run() {
                 if data.read_to_string(&mut cljs).is_err() {
                     return rouille::Response::text("Malformed string").with_status_code(400);
                 }
-                if let Err(error) = app_handle.emit("cljs", cljs) {
+                if let Err(error) = app_handle.emit("newmacs-eval", cljs) {
                     eprintln!("Failed to run ClojureScript: {error}");
                     return rouille::Response::text("Internal server error").with_status_code(500);
                 }
