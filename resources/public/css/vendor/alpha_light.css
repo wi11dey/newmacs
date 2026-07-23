@@ -1,62 +1,64 @@
 .flexlayout__layout {
-  --color-text: #eeeeee;
-  --color-background: black;
-  --color-base: black;
-  --color-1: rgb(17.85, 17.85, 17.85);
-  --color-2: rgb(25.5, 25.5, 25.5);
-  --color-3: rgb(38.25, 38.25, 38.25);
-  --color-4: #333333;
-  --color-5: rgb(63.75, 63.75, 63.75);
-  --color-6: rgb(76.5, 76.5, 76.5);
-  --color-drag1: rgb(207, 232, 255);
-  --color-drag2: rgb(183, 209, 181);
-  --color-drag1-background: rgba(128, 128, 128, 0.15);
-  --color-drag2-background: rgba(128, 128, 128, 0.15);
+  --color-text: black;
+  --color-background: #ffffff;
+  --color-base: #f9fafb;
+  --color-1: #ededee;
+  --color-2: #e5e7eb;
+  --color-3: #d1d5db;
+  --color-4: #9ca3af;
+  --color-5: #6b7280;
+  --color-6: #4b5563;
+  --color-drag1: rgb(95, 134, 196);
+  --color-drag2: rgb(119, 166, 119);
+  --color-drag1-background: rgba(59, 130, 246, 0.1);
+  --color-drag2-background: rgba(16, 185, 129, 0.075);
   --font-size: medium;
-  --font-family: Roboto, Arial, sans-serif;
-  --font-weight: normal;
+  --font-family: system-ui, -apple-system, Arial, sans-serif;
+  --font-weight: 500;
   --splitter-size: 8px;
   --splitter-active-size: 8px;
   --splitter-handle-visibility: hidden;
-  --color-overflow: gray;
-  --color-icon: gray;
-  --color-focus: #93c5fd;
+  --color-overflow: var(--color-5);
+  --color-icon: var(--color-5);
+  --color-focus: #3b7de7;
   --color-tabset-background: var(--color-1);
   --color-tabset-background-selected: var(--color-1);
-  --color-tabset-background-maximized: var(--color-6);
-  --color-tabset-divider-line: var(--color-4);
-  --color-border-tab-content: var(--color-background);
+  --color-tabset-background-maximized: var(--color-1);
+  --color-tabset-divider-line: var(--color-2);
+  --color-border-tab-content: var(--color-1);
   --color-border-background: var(--color-1);
-  --color-border-divider-line: var(--color-4);
+  --color-border-divider-line: var(--color-2);
   --color-tab-content: var(--color-background);
-  --color-tab-selected: var(--color-text);
-  --color-tab-selected-background: var(--color-4);
-  --color-tab-unselected: gray;
+  --color-tab-selected: #3b7de7;
+  --color-tab-selected-background: var(--color-background);
+  --color-tab-unselected: var(--color-5);
   --color-tab-unselected-background: transparent;
   --color-tab-textbox: var(--color-text);
-  --color-tab-textbox-background: var(--color-3);
-  --color-border-tab-selected: var(--color-text);
-  --color-border-tab-selected-background: var(--color-4);
-  --color-border-tab-unselected: gray;
-  --color-border-tab-unselected-background: var(--color-2);
-  --color-splitter: var(--color-2);
+  --color-tab-textbox-background: var(--color-background);
+  --color-border-tab-selected: #3b7de7;
+  --color-border-tab-selected-background: var(--color-background);
+  --color-border-tab-unselected: var(--color-5);
+  --color-border-tab-unselected-background: var(--color-1);
+  --color-splitter: var(--color-1);
   --color-splitter-hover: var(--color-4);
-  --color-splitter-drag: var(--color-5);
+  --color-splitter-drag: var(--color-4);
   --color-splitter-handle: var(--color-3);
-  --color-drag-rect-border: var(--color-4);
-  --color-drag-rect-background: var(--color-1);
+  --color-drag-rect-border: var(--color-3);
+  --color-drag-rect-background: var(--color-background);
   --color-drag-rect: var(--color-text);
-  --color-popup-border: var(--color-6);
+  --color-popup-border: var(--color-2);
   --color-popup-unselected: var(--color-text);
   --color-popup-unselected-background: var(--color-background);
-  --color-popup-selected: var(--color-text);
-  --color-popup-selected-background: var(--color-4);
-  --color-edge-marker: gray;
-  --color-edge-icon: #eee;
-  --color-mini-scroll-indicator: rgba(128, 128, 128, 0.5);
-  --color-mini-scroll-indicator-hovered: rgba(128, 128, 128, 0.8);
-  --size-mini-scroll-indicator: 3px;
-  --color-toolbar-button-hover: var(--color-4);
+  --color-popup-selected: var(--color-drag1);
+  --color-popup-selected-background: var(--color-1);
+  --color-edge-marker: var(--color-3);
+  --color-edge-icon: var(--color-6);
+  --color-mini-scroll-indicator: rgba(0, 0, 0, 0.1);
+  --color-mini-scroll-indicator-hovered: rgba(0, 0, 0, 0.3);
+  --size-mini-scroll-indicator: 4px;
+  --color-toolbar-button-hover: var(--color-2);
+  --tab-button-radius: 10px;
+  --border-button-radius: 5px;
   --color-float-window-header-background: var(--color-tabset-background);
 }
 
@@ -831,28 +833,98 @@
 }
 
 /* ======================== End of Base Classes =========================== */
-/* 
-    dark theme overrides 
-*/
+.flexlayout__tab {
+  border: 5px solid var(--color-background);
+  border-radius: 5px;
+}
+.flexlayout__splitter_border .flexlayout__splitter_handle {
+  visibility: visible;
+}
+.flexlayout__tabset_tabbar_outer_top {
+  border-bottom: unset;
+}
+.flexlayout__tabset_tabbar_outer_bottom {
+  border-top: unset;
+}
+.flexlayout__tab_button {
+  border-bottom: 2px solid transparent;
+  padding: 4px 12px;
+}
+.flexlayout__tab_button--selected:hover {
+  background-color: var(--color-background);
+}
+.flexlayout__tabset_tabbar_outer_top .flexlayout__tab_button--selected {
+  border-top-left-radius: var(--tab-button-radius);
+  border-top-right-radius: var(--tab-button-radius);
+}
+.flexlayout__tabset_tabbar_outer_bottom .flexlayout__tab_button--selected {
+  border-bottom-left-radius: var(--tab-button-radius);
+  border-bottom-right-radius: var(--tab-button-radius);
+}
+.flexlayout__tabset_tab_spacer {
+  width: 12px;
+}
+.flexlayout__tabset_tab_divider, .flexlayout__border_tab_divider {
+  width: 2px;
+  border-radius: 2px;
+  height: 0.8em;
+  margin: 0px 5px 0px 5px;
+  background-color: #ddd;
+}
+.flexlayout__tabset_tab_divider_selected_before, .flexlayout__tabset_tab_divider_selected_after {
+  width: 12px;
+  height: 100%;
+  margin: unset;
+  border-radius: unset;
+  background-color: var(--color-tab-selected-background);
+}
+.flexlayout__tabset_tab_divider_inner {
+  height: 100%;
+}
 .flexlayout__tabset-selected {
-  background-image: linear-gradient(var(--color-background), var(--color-4));
+  --tab-divider-bg: var(--color-tabset-background-selected);
 }
 .flexlayout__tabset-maximized {
-  background-image: linear-gradient(var(--color-6), var(--color-2));
+  --tab-divider-bg: var(--color-tabset-background-maximized);
 }
-.flexlayout__tab_top {
-  box-shadow: inset -2px 0px 5px rgba(0, 0, 0, 0.1);
-  border-top-left-radius: 3px;
-  border-top-right-radius: 3px;
+.flexlayout__tabset_tabbar_outer_top .flexlayout__tabset_tab_divider_selected_before .flexlayout__tabset_tab_divider_inner {
+  border-bottom-right-radius: var(--tab-button-radius);
+  background-color: var(--tab-divider-bg, var(--color-tabset-background));
 }
-.flexlayout__tab_bottom {
-  box-shadow: inset -2px 0px 5px rgba(0, 0, 0, 0.1);
-  border-bottom-left-radius: 3px;
-  border-bottom-right-radius: 3px;
+.flexlayout__tabset_tabbar_outer_top .flexlayout__tabset_tab_divider_selected_after .flexlayout__tabset_tab_divider_inner {
+  border-bottom-left-radius: var(--tab-button-radius);
+  background-color: var(--tab-divider-bg, var(--color-tabset-background));
+}
+.flexlayout__tabset_tabbar_outer_bottom .flexlayout__tabset_tab_divider_selected_before .flexlayout__tabset_tab_divider_inner {
+  border-top-right-radius: var(--tab-button-radius);
+  background-color: var(--tab-divider-bg, var(--color-tabset-background));
+}
+.flexlayout__tabset_tabbar_outer_bottom .flexlayout__tabset_tab_divider_selected_after .flexlayout__tabset_tab_divider_inner {
+  border-top-left-radius: var(--tab-button-radius);
+  background-color: var(--tab-divider-bg, var(--color-tabset-background));
 }
 .flexlayout__border_button {
-  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.15);
-  border-radius: 3px;
+  border-radius: var(--border-button-radius);
+  margin: 3px;
+  padding: 3px 8px;
+}
+.flexlayout__border_button--selected {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+.flexlayout__border_sizer {
+  padding-bottom: 8px;
+}
+.flexlayout__popup_menu_container {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--color-2);
+  padding: 4px;
+}
+.flexlayout__popup_menu_item {
+  border-radius: 4px;
+  padding: 6px 8px;
+}
+.flexlayout__popup_menu_item:hover {
+  background-color: var(--color-1);
 }
 
-/*# sourceMappingURL=dark.css.map */
+/*# sourceMappingURL=alpha_light.css.map */
